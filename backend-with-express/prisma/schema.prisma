@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -12,48 +10,46 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  firstName String
-  lastName  String
-  password  String   @db.Text()
+  username  String   @unique @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  firstName String   @db.VarChar(255)
+  lastName  String   @db.VarChar(255)
+  password  String   @db.VarChar(500)
   rating    rating[]
 }
 
 model rating {
-  user      User    @relation(fields: [userId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
   userId    Int
   productId Int
   rating    Int
+  product   Product @relation(fields: [productId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
 
   @@id([userId, productId])
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
-  title       String     @unique
-  slug        String     @unique
+  id          Int       @id @default(autoincrement())
+  title       String    @unique @db.VarChar(255)
+  slug        String    @unique @db.VarChar(300)
   description String
-  url         String
-  price       Decimal    @default(0)
-  createdAt   DateTime?  @default(now())
-  updatedAt   DateTime?  @updatedAt
+  url         String    @db.VarChar(255)
+  price       Decimal   @default(0) @db.Decimal(8, 2)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
   rating      rating[]
-  CartItem    CartItem[]
 }
 
-model Cart {
-  id        String    @id @default(uuid())
-  author  User
-  authorId    Int
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
-}
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+view ProductWithRating {
+  id          Int       @unique
+  title       String?   @db.VarChar(255)
+  slug        String?   @db.VarChar(300)
+  url         String?   @db.VarChar(255)
+  price       Decimal?  @db.Decimal(8, 2)
+  createdAt   DateTime?
+  rating      Decimal?  @db.Decimal(5, 2)
+  total_votes Int?
 
-model CartItem {
-  id        Int     @id @default(autoincrement())
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-  quantity  Int
+  @@map("productwithrating")
 }
