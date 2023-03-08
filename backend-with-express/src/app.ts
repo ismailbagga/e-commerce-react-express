@@ -5,16 +5,20 @@ import { productRouter, userRouter } from "./routers/router";
 import { fromZodError } from "zod-validation-error";
 import { Prisma } from "@prisma/client";
 import ApiError from "./controllers/ApiError";
+
+JSON.stringify(
+  this,
+  (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
+);
+
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(express.json());
 
 app.use("/api/products", productRouter);
 app.use("/api/user", userRouter);
-
-
-
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof ApiError) return res.status(err.status).json({ message: err.message });
@@ -28,10 +32,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   }
   res.status(400).json({ message: "Ops Something Went Wrong !" });
 });
-
-
-
-
 
 app.listen(4000, () => {
   console.log("---------------------------------------- Server start ---------------------------------------------------");

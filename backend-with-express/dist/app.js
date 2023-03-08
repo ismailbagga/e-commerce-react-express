@@ -10,9 +10,12 @@ const router_1 = require("./routers/router");
 const zod_validation_error_1 = require("zod-validation-error");
 const client_1 = require("@prisma/client");
 const ApiError_1 = __importDefault(require("./controllers/ApiError"));
+JSON.stringify(this, (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
+);
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-app.use(body_parser_1.default.json());
+// app.use(bodyParser.json());
+app.use(express_1.default.json());
 app.use("/api/products", router_1.productRouter);
 app.use("/api/user", router_1.userRouter);
 app.use((err, req, res, next) => {
