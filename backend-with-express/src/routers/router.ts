@@ -1,4 +1,7 @@
-import { getTopRatedProducts, getLatestProducts } from "./../controllers/ProductController";
+import {
+  getHomePageProducts,
+  getLatestProducts,
+} from "./../controllers/ProductController";
 import express from "express";
 import { saveProduct } from "../controllers/ProductController";
 import { registerUser } from "../controllers/UserController";
@@ -6,7 +9,7 @@ import { registerUser } from "../controllers/UserController";
 export const productRouter = express.Router();
 
 productRouter.get("/latest", getLatestProducts);
-productRouter.get("/top-rated", getTopRatedProducts);
+productRouter.get("/home", getHomePageProducts);
 
 productRouter.post("", saveProduct);
 
