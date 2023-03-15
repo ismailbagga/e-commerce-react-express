@@ -1,56 +1,21 @@
-import { Prisma, Product } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { RequestHandler } from "express";
-import { late, unknown, z } from "zod";
 import prismaClientInstance from "../utils/prisma-client";
-import { title } from "process";
 import ApiError from "./ApiError";
 import slugify from "slugify";
-const ProductBody = z.object({
-  // id: z.bigint().optional(),
-  title: z.string(),
-  description: z.string(),
-  url: z.string(),
-  price: z.number().min(0, "price moust be positive"),
-});
-
-export type ProductPreview = { ratingCount: number; rating: number } & Product;
-
-const RatingLevel = z.coerce
-  .number()
-  .min(1, "rating must be less then 1")
-  .max(4, "rating can be bigger then 4")
-  .optional();
-const Price = z.coerce.number().min(1, "Price Must Be more then 1$").optional();
-
-const HomePageNumber = z.coerce
-  .number()
-  .min(1)
-  .max(4)
-  .catch(() => 1);
-const SearchPageNumber = z
-  .number()
-  .min(1)
-  .catch(() => 1);
-
-const FromPageTitle = z
-  .union([z.literal("HOME_PAGE"), z.literal("SEARCH_PAGE")])
-  .catch("HOME_PAGE");
-type FromPageTitle = z.infer<typeof FromPageTitle>;
-// type ProductBody = z.infer<typeof ProductBody>;
-
-const ProductListingCategory = z
-  .union([
-    z.literal("latest"),
-    z.literal("top-selling"),
-    z.literal("top-rated"),
-  ])
-  .default("latest");
+import {
+  HomePageNumber,
+  HomeProductListingCategory,
+  Price,
+  ProductBody,
+  RatingLevel,
+  SearchPageNumber,
+  SearchProductListingCategory,
+} from "../types/products-t-v";
 
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
-    const listingCategory = ProductListingCategory.parse(req.query.listing);
-    console.log(listingCategory);
-
+    const listingCategory = HomeProductListingCategory.parse(req.query.listing);
     const PAGE_SIZE = 2;
     // 4 + 4 + 4 + 3
     const MAX_PRODUCTS_TO_SHOW = PAGE_SIZE * 3;
@@ -87,43 +52,50 @@ export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const getTopSellingProducts: RequestHandler = async (req, res, next) => {
-  const productsIdResult = await prismaClientInstance.product.findMany({});
-
-  res.status(200).json(productsIdResult);
-};
-
-export const getLatestProducts: RequestHandler = async (req, res, next) => {
+export const searchForProducts: RequestHandler = async (req, res, next) => {
   try {
+    const listingCategory = SearchProductListingCategory.parse(
+      req.query.listing
+    );
     const term = req.query.term as string;
-    const from = FromPageTitle.parse(req.query.from);
     const rating = RatingLevel.parse(req.query.rating);
     const minPrice = Price.parse(req.query.minPrice);
     const maxPrice = Price.parse(req.query.maxPrice);
     const page = SearchPageNumber.parse(req.query.page);
-    let PAGE_SIZE = 10;
+    const PAGE_SIZE = 10;
 
-    const latestProducts =
-      await prismaClientInstance.productWithRating.findMany({
-        where: {
-          price: { gte: minPrice, lte: maxPrice },
-          title: { contains: term, mode: "insensitive" },
-        },
-        skip: PAGE_SIZE * (page - 1),
-        take: PAGE_SIZE,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+    const where: Prisma.ProductWithRatingWhereInput = {
+      title: { contains: term, mode: "insensitive" },
+      rating: { gte: rating },
+      price: { lte: minPrice, gte: maxPrice },
+    };
+    const pagination = {
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+    };
 
-    const finalResult: ProductPreview[] = [];
+    if (listingCategory === "top-selling") {
+      return res.status(200).json({ count: 50, products: [] });
+    }
 
-    res.status(200).json(finalResult);
+    let orderBy: Prisma.ProductWithRatingOrderByWithRelationInput = {
+      rating: "desc",
+    };
+
+    if (listingCategory === "latest") {
+      orderBy = {
+        createdAt: "desc",
+      };
+    }
+    const products = await prismaClientInstance.productWithRating.findMany({
+      where,
+      orderBy,
+      ...pagination,
+    });
+    res.status(200).json(products);
   } catch (err) {
     next(err);
   }
-
-  //
 };
 
 export const saveProduct: RequestHandler = async (req, res, next) => {

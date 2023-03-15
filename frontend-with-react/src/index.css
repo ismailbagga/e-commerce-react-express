@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply bg-gray-200  overflow-y-scroll;
+}
+input {
+  @apply outline-none border-none;
+}
