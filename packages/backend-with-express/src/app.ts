@@ -4,26 +4,26 @@ import { z } from "zod";
 import { productRouter, userRouter } from "./routers/router";
 import { fromZodError } from "zod-validation-error";
 import { Prisma } from "@prisma/client";
+import cors from "cors";
 import ApiError from "./controllers/ApiError";
-
-JSON.stringify(
-  this,
-  (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
-);
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 app.use(express.json());
-
+app.use(cors({ origin: "*" }));
 app.use("/api/products", productRouter);
 app.use("/api/user", userRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  if (err instanceof ApiError) return res.status(err.status).json({ message: err.message });
+  if (err instanceof ApiError)
+    return res.status(err.status).json({ message: err.message });
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) return res.status(400).json({ message: "something went wrong saving data try again" });
+  if (err instanceof Prisma.PrismaClientKnownRequestError)
+    return res
+      .status(400)
+      .json({ message: "something went wrong saving data try again" });
 
   if (err instanceof z.ZodError) {
     let { message } = fromZodError(err);
@@ -34,5 +34,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(4000, () => {
-  console.log("---------------------------------------- Server start ---------------------------------------------------");
+  console.log(
+    "---------------------------------------- Server start ---------------------------------------------------"
+  );
 });

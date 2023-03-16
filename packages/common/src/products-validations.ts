@@ -1,4 +1,3 @@
-import { HomeProductListingCategory } from "./products-validations";
 import { z } from "zod";
 
 export const ProductBody = z.object({
@@ -17,6 +16,11 @@ export type Product = {
   price: number;
   createdAt: Date | null;
   updatedAt: Date | null;
+};
+
+export type ProductPaginationResult = {
+  count: number;
+  products: Product[];
 };
 
 export type ProductPreview = { ratingCount: number; rating: number } & Product;
