@@ -16,22 +16,9 @@ import {
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
     const listingCategory = HomeProductListingCategory.parse(req.query.listing);
-    const PAGE_SIZE = 2;
-    // 4 + 4 + 4 + 3
-    const MAX_PRODUCTS_TO_SHOW = PAGE_SIZE * 3;
     const page = HomePageNumber.parse(req.query.page);
 
-    let productsCount = await prismaClientInstance.product.count();
-    if (productsCount > MAX_PRODUCTS_TO_SHOW)
-      productsCount = MAX_PRODUCTS_TO_SHOW;
-
-    const pagination = {
-      take: PAGE_SIZE + (page === 4 ? 0 : 1),
-      skip: (page - 1) * PAGE_SIZE,
-    };
-
-    if (listingCategory === "top-selling")
-      return res.status(200).json({ count: productsCount, products: [] });
+    if (listingCategory === "top-selling") return res.status(200).json([]);
     let orderBy: Prisma.ProductWithRatingOrderByWithRelationInput = {
       rating: "desc",
     };
@@ -44,9 +31,9 @@ export const getHomePageProducts: RequestHandler = async (req, res, next) => {
 
     const products = await prismaClientInstance.productWithRating.findMany({
       orderBy,
-      ...pagination,
+      take: 10,
     });
-    res.status(200).json({ count: productsCount, products });
+    res.status(200).json(products);
   } catch (err) {
     next(err);
   }
