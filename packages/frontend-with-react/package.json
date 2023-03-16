@@ -1,7 +1,6 @@
 {
-  "name": "frontend-with-react",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@site-wrapper/frontend-with-react",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@site-wrapper/common": "1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.2"

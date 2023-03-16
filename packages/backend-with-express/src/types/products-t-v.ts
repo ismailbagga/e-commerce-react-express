@@ -1,4 +1,3 @@
-import { Product } from "@prisma/client";
 import { z } from "zod";
 export const ProductBody = z.object({
   // id: z.bigint().optional(),
@@ -7,6 +6,16 @@ export const ProductBody = z.object({
   url: z.string(),
   price: z.number().min(0, "price moust be positive"),
 });
+export type Product = {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  url: string;
+  price: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
 
 export type ProductPreview = { ratingCount: number; rating: number } & Product;
 

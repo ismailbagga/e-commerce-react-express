@@ -1,0 +1,9 @@
+{
+  "name": "@site-wrapper/common",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "ISC",
+  "dependencies": {
+    "zod": "^3.21.4"
+  }
+}
