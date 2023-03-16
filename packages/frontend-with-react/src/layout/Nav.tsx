@@ -39,7 +39,9 @@ export const NavSearchForm = () => {
       >
         <option value="ALL">All</option>
         {categories.map((c) => (
-          <option value={c.title}>{c.title}</option>
+          <option key={c.id} value={c.title}>
+            {c.title}
+          </option>
         ))}
       </select>
       <form
@@ -78,7 +80,7 @@ const SideNav = () => {
   return (
     <>
       <button className="lg:hidden" onClick={() => setVisibility(true)}>
-        <img className="block h-10 w-10" h-full src={BarIcon}></img>
+        <img className="block h-10  w-10" src={BarIcon}></img>
       </button>
       <aside
         className={`${
