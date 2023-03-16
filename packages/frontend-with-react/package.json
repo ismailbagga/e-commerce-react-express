@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@site-wrapper/common": "1.0.0",
+    "@tailwindcss/line-clamp": "^0.4.2",
     "axios": "^1.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
