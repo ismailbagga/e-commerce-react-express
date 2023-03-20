@@ -1,0 +1,30 @@
+.left-slide-animation {
+  animation: slideLeft 400ms linear;
+}
+.right-slide-animation {
+  animation: slideRight 400ms linear;
+}
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0rem);
+  }
+  50% {
+    transform: translateX(5rem);
+  }
+  100% {
+    transform: translateX(0rem);
+  }
+}
+
+@keyframes slideRight {
+  0% {
+    transform: translateX(calc(-1 * var(--last-slide) * 100%));
+  }
+  50% {
+    transform: translateX(calc(-1 * var(--last-slide) * 100% - 5rem));
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--last-slide) * 100%));
+  }
+}

@@ -1,14 +1,14 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import Nav from "../layout/Nav";
+import React from 'react'
+import { Outlet } from 'react-router-dom'
+import Nav from '../layout/Nav'
 
 const PublicLayout = () => {
   return (
-    <div>
+    <main className="">
       <Nav />
       <Outlet />
-    </div>
-  );
-};
+    </main>
+  )
+}
 
-export default PublicLayout;
+export default PublicLayout

@@ -31,10 +31,10 @@ export const NavSearchForm = () => {
     console.log(searchEl.current?.value)
   }
   return (
-    <div className="flex  h-10 ">
+    <div className="absolute top-[7rem] right-[50%] flex  h-10 translate-x-[50%]  md:static md:translate-x-0 ">
       <select
         placeholder="Categories"
-        className="rounded-l bg-gray-300 px-5 "
+        className="rounded-l bg-gray-300 px-1 "
         defaultValue="ALL"
       >
         <option value="ALL">All</option>
@@ -48,13 +48,13 @@ export const NavSearchForm = () => {
         className="flex items-center rounded-r bg-white pl-2"
         onSubmit={handleSubmit}
       >
-        <button type="submit">
+        <button type="submit" className="shrink-0">
           <img className="h-8" src={SearchIcon} alt="Search" />
         </button>
         <input
           ref={searchEl}
           type="text"
-          className="h-full w-52 bg-transparent px-2 outline-none"
+          className="h-full bg-transparent px-2 outline-none md:w-52"
           placeholder="Search ..."
         />
       </form>
@@ -85,7 +85,7 @@ const SideNav = () => {
       <aside
         className={`${
           isVisible ? 'translate-x-0' : 'translate-x-full'
-        } fixed top-0 right-0 h-screen w-full bg-black/30 transition-transform  lg:hidden `}
+        } fixed top-0 right-0 z-50 h-screen w-full bg-black/30 transition-transform  lg:hidden `}
         onClick={() => setVisibility(false)}
       >
         <div
@@ -116,7 +116,7 @@ const SideNav = () => {
 
 const Nav = () => {
   return (
-    <nav className="flex w-full items-center justify-between   px-5 py-3">
+    <nav className="sm: relative flex w-full items-center justify-between  px-5 py-3 pb-16 md:pb-0">
       <Link to="/" className="block ">
         <img
           className="block h-16 w-16 rounded-full "
