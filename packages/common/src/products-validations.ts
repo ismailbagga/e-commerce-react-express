@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-export const ProductBody = z.object({
+export const ProductUpload = z.object({
   // id: z.bigint().optional(),
   title: z.string(),
   description: z.string(),
   url: z.string(),
   price: z.number().min(0, "price must be positive"),
+  categories: z.array(z.number().min(1)).optional(),
 });
 export type Product = {
   id: number;

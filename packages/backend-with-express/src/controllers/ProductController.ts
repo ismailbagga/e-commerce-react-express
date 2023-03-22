@@ -12,6 +12,7 @@ import {
   SearchPageNumber,
   SearchProductListingCategory,
 } from "../types/products-t-v";
+import { ProductUpload } from "@site-wrapper/common";
 
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
@@ -86,9 +87,10 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
 };
 
 export const saveProduct: RequestHandler = async (req, res, next) => {
-  const result = await ProductBody.safeParse(req.body);
+  const result = await ProductUpload.safeParse(req.body);
   if (!result.success) return next(result.error);
-  const productSlug = slugify(result.data.title);
+  const { data } = result;
+  const productSlug = slugify(data.title.toLowerCase());
   const product = await prismaClientInstance.product.findFirst({
     where: {
       slug: productSlug,
@@ -97,8 +99,46 @@ export const saveProduct: RequestHandler = async (req, res, next) => {
   if (product)
     return next(new ApiError("product with this title already exists", 405));
   try {
+    if (data.categories) {
+      const categoriesCount = await prismaClientInstance.category.aggregate({
+        _count: { id: true },
+        where: {
+          id: {
+            in: data.categories,
+          },
+        },
+      });
+      if (data.categories.length !== categoriesCount._count.id)
+        throw new ApiError("Some Categories Selected were not found", 404);
+    }
+
     const newProduct = await prismaClientInstance.product.create({
-      data: { ...result.data, slug: productSlug },
+      data: {
+        title: data.title,
+        description: data.description,
+        url: data.url,
+        price: data.price,
+        slug: productSlug,
+
+        categories: {
+          create:
+            data.categories?.map((c) => {
+              console.log({
+                connect: {
+                  id: c,
+                },
+              });
+
+              return {
+                category: {
+                  connect: {
+                    id: c,
+                  },
+                },
+              };
+            }) ?? [],
+        },
+      },
     });
     res.status(201).json(newProduct);
   } catch (err) {

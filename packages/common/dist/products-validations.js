@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchProductListingCategory = exports.HomeProductListingCategoryValidator = exports.SearchPageNumber = exports.HomePageNumber = exports.Price = exports.RatingLevel = exports.ProductBody = void 0;
+exports.SearchProductListingCategory = exports.HomeProductListingCategoryValidator = exports.SearchPageNumber = exports.HomePageNumber = exports.Price = exports.RatingLevel = exports.ProductUpload = void 0;
 const zod_1 = require("zod");
-exports.ProductBody = zod_1.z.object({
+exports.ProductUpload = zod_1.z.object({
     // id: z.bigint().optional(),
     title: zod_1.z.string(),
     description: zod_1.z.string(),
     url: zod_1.z.string(),
     price: zod_1.z.number().min(0, "price must be positive"),
+    categories: zod_1.z.array(zod_1.z.number().min(1)).optional(),
 });
 exports.RatingLevel = zod_1.z.coerce
     .number()

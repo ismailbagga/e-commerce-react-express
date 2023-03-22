@@ -1,19 +1,22 @@
 import { z } from "zod";
-export declare const ProductBody: z.ZodObject<{
+export declare const ProductUpload: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
     url: z.ZodString;
     price: z.ZodNumber;
+    categories: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
 }, "strip", z.ZodTypeAny, {
     title: string;
     description: string;
     url: string;
     price: number;
+    categories?: number[] | undefined;
 }, {
     title: string;
     description: string;
     url: string;
     price: number;
+    categories?: number[] | undefined;
 }>;
 export type Product = {
     id: number;
