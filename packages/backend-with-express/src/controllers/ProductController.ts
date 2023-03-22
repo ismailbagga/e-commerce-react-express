@@ -1,3 +1,4 @@
+import { CategoriesOnProducts } from "./../../node_modules/.prisma/client/index.d";
 import { Prisma } from "@prisma/client";
 import { RequestHandler } from "express";
 import prismaClientInstance from "../utils/prisma-client";
@@ -119,27 +120,15 @@ export const saveProduct: RequestHandler = async (req, res, next) => {
         url: data.url,
         price: data.price,
         slug: productSlug,
-
-        categories: {
-          create:
-            data.categories?.map((c) => {
-              console.log({
-                connect: {
-                  id: c,
-                },
-              });
-
-              return {
-                category: {
-                  connect: {
-                    id: c,
-                  },
-                },
-              };
-            }) ?? [],
-        },
       },
     });
+    if (data.categories)
+      await prismaClientInstance.$executeRaw`INSERT INTO public."CategoriesOnProducts"("productId", "categoryId")
+	              VALUES ${Prisma.join(
+                  data.categories.map(
+                    (id) => Prisma.sql`(${Prisma.join([newProduct.id, id])})`
+                  )
+                )};`;
     res.status(201).json(newProduct);
   } catch (err) {
     return next(err);
