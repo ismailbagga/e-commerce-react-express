@@ -1,0 +1,15 @@
+{
+  /* Skip type checking all .d.ts files. */
+  "files": [],
+  "references": [
+    {
+      "path": "packages/common"
+    },
+    {
+      "path": "packages/backend-with-express"
+    },
+    {
+      "path": "packages/frontend-with-react"
+    }
+  ]
+}
