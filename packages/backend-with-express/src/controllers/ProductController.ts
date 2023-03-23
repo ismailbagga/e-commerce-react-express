@@ -1,4 +1,4 @@
-import { CategoriesOnProducts } from "./../../node_modules/.prisma/client/index.d";
+import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { RequestHandler } from "express";
 import prismaClientInstance from "../utils/prisma-client";
@@ -8,12 +8,11 @@ import {
   HomePageNumber,
   HomeProductListingCategory,
   Price,
-  ProductBody,
   RatingLevel,
   SearchPageNumber,
   SearchProductListingCategory,
 } from "../types/products-t-v";
-import { ProductUpload } from "@site-wrapper/common";
+import { ProductUpload, TableId } from "@site-wrapper/common";
 
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
@@ -51,12 +50,14 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
     const minPrice = Price.parse(req.query.minPrice);
     const maxPrice = Price.parse(req.query.maxPrice);
     const page = SearchPageNumber.parse(req.query.page);
+    const categoryId = TableId.parse(req.query.categoryId);
     const PAGE_SIZE = 10;
 
     const where: Prisma.ProductWithRatingWhereInput = {
       title: { contains: term, mode: "insensitive" },
       rating: { gte: rating },
       price: { lte: minPrice, gte: maxPrice },
+      CategoriesOnProducts: { some: { categoryId } },
     };
     const pagination = {
       take: PAGE_SIZE,
@@ -79,6 +80,7 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
     const products = await prismaClientInstance.productWithRating.findMany({
       where,
       orderBy,
+
       ...pagination,
     });
     res.status(200).json(products);

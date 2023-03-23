@@ -38,7 +38,7 @@ model Product {
   createdAt   DateTime?              @default(now())
   updatedAt   DateTime?              @updatedAt
   rating      rating[]
-  categories  CategoriesOnProducts[]
+  categories  CategoriesOnProducts[] @relation("ProductOfCate")
 }
 
 model Category {
@@ -50,24 +50,27 @@ model Category {
 }
 
 model CategoriesOnProducts {
-  productId  Int
-  categoryId Int
-  product    Product  @relation(fields: [productId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
+  productId         Int
+  categoryId        Int
+  product           Product           @relation(name: "ProductOfCate", fields: [productId], references: [id])
+  category          Category          @relation(fields: [categoryId], references: [id])
+  // This Constraint will be removed from migration
+  productWithRating ProductWithRating @relation(fields: [productId], references: [id], map: "categories_on_product_with_rating")
 
   @@id([productId, categoryId])
 }
 
 /// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 view ProductWithRating {
-  id          Int       @unique
-  title       String?   @db.VarChar(255)
-  slug        String?   @db.VarChar(300)
-  url         String?   @db.VarChar(255)
-  price       Decimal?  @db.Decimal(8, 2)
-  createdAt   DateTime?
-  rating      Decimal?  @db.Decimal(5, 2)
-  total_votes Int?
+  id                   Int                    @unique
+  title                String?                @db.VarChar(255)
+  slug                 String?                @db.VarChar(300)
+  url                  String?                @db.VarChar(255)
+  price                Decimal?               @db.Decimal(8, 2)
+  createdAt            DateTime?
+  rating               Decimal?               @db.Decimal(5, 2)
+  total_votes          Int?
+  CategoriesOnProducts CategoriesOnProducts[]
 
   @@map("productwithrating")
 }
