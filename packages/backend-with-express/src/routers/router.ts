@@ -5,7 +5,10 @@ import {
 import express from "express";
 import { saveProduct } from "../controllers/ProductController";
 import { registerUser } from "../controllers/UserController";
-import { createCategory } from "../controllers/CategoryController";
+import {
+  createCategory,
+  loadAllCategories,
+} from "../controllers/CategoryController";
 
 export const productRouter = express.Router();
 
@@ -19,3 +22,4 @@ userRouter.post("/register", registerUser);
 
 export const categoryRouter = express.Router();
 categoryRouter.post("/", createCategory);
+categoryRouter.get("/", loadAllCategories);
