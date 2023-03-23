@@ -1,29 +1,23 @@
-import React, {
-  FC,
-  FormEventHandler,
-  PropsWithChildren,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { FC, FormEventHandler, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SearchIcon from '../assets/icons/search.png'
 import BarIcon from '../assets/icons/bars.png'
 import CloseIcon from '../assets/icons/close.png'
+import axiosClient from '../setup/axiosClient'
 
-export type Categories = {
+export type PrimaryCategory = {
   id: number
   title: string
 }
-
+const fetchAllCategories = async () => {
+  const result = await axiosClient.get<PrimaryCategory[]>('/categories')
+  return result.data
+}
 export const NavSearchForm = () => {
   const searchEl = useRef<HTMLInputElement>(null)
-  const [categories, setCategories] = useState<Categories[]>([])
+  const [categories, setCategories] = useState<PrimaryCategory[]>([])
   useEffect(() => {
-    setCategories([
-      { id: 1, title: 'Technologies' },
-      { id: 2, title: 'Home Products' },
-    ])
+    fetchAllCategories().then((data) => setCategories(data))
   }, [])
 
   const handleSubmit: FormEventHandler = (e) => {
