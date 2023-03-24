@@ -57,64 +57,59 @@ const ProductsCarousels: FC<ProductsCarouselsProps> = (props) => {
   const wrapperEl = useRef<HTMLDivElement>(null)
   let [scrolls, setScrolls] = useState(0)
   const [data, setData] = useState<Product[]>([])
+
+  const extractComputedValue = (property: string, defaultValue = '4') => {
+    if (!wrapperEl.current) return parseInt(defaultValue)
+    return parseInt(
+      getComputedStyle(wrapperEl.current).getPropertyValue(property)
+    )
+  }
+  const setPropertyToWrapper = (property: string, value: string) => {
+    if (!wrapperEl.current) return
+    wrapperEl.current.style.setProperty(property, value)
+  }
+  const applySlide = (x100Times: number) => {
+    if (!wrapperEl.current) return
+    wrapperEl.current.style.transform = `translateX(calc(${100 * x100Times}%))`
+  }
+  const applySlideInEdges = (className: string) => {
+    if (!wrapperEl.current) return
+    wrapperEl.current.classList.add(className)
+    setTimeout(() => {
+      wrapperEl.current && wrapperEl.current.classList.remove(className)
+    }, 0.4 * 1000)
+  }
   const calculateLastSlide = () => {
     if (!wrapperEl.current) return
-    const itemsPerScroll = parseInt(
-      getComputedStyle(wrapperEl.current).getPropertyValue(
-        '--items-per-scroll'
-      ) ?? '4'
-    )
-    const totalItems = parseInt(
-      getComputedStyle(wrapperEl.current).getPropertyValue('--total-items') ??
-        '16'
-    )
+    const itemsPerScroll = extractComputedValue('--items-per-scroll')
+    const totalItems = extractComputedValue('--total-items')
+
     const lastSlide = Math.ceil(totalItems / itemsPerScroll - 1)
     setScrolls((prev) => {
-      console.log(
-        'setting state : prev VS max Vs Abs',
-        prev,
-        lastSlide,
-        Math.abs(prev)
-      )
       // debugger
-      if (Math.abs(prev) > lastSlide && wrapperEl.current) {
-        wrapperEl.current.style.transform = `translateX(calc(${
-          100 * lastSlide * -1
-        }%))`
+      if (Math.abs(prev) > lastSlide) {
+        applySlide(lastSlide * -1)
         return -1 * lastSlide
       }
       return prev
     })
-    wrapperEl.current.style.setProperty('--last-slide', lastSlide.toString())
+    setPropertyToWrapper('--last-slide', lastSlide.toString())
   }
 
   const scrollCarousel = (direction: 'RIGHT' | 'LEFT') => {
     if (!wrapperEl.current) return
     // debugger
     direction == 'LEFT' ? scrolls++ : scrolls--
-    const ITEMS_PER_SLIDE = parseInt(
-      getComputedStyle(wrapperEl.current).getPropertyValue(
-        '--items-per-scroll'
-      ) ?? '4'
-    )
+    const ITEMS_PER_SLIDE = extractComputedValue('--items-per-scroll')
     const NUMBER_OF_SCROLLS_POSSIBLE =
       Math.ceil(data.length / ITEMS_PER_SLIDE) - 1
     if (scrolls > 0) {
       scrolls = 0
-      wrapperEl.current.classList.add('left-slide-animation')
-      setTimeout(() => {
-        wrapperEl.current &&
-          wrapperEl.current.classList.remove('left-slide-animation')
-      }, 0.4 * 1000)
+      applySlideInEdges('left-slide-animation')
     } else if (Math.abs(scrolls) > NUMBER_OF_SCROLLS_POSSIBLE) {
-      wrapperEl.current.classList.add('right-slide-animation')
-      setTimeout(() => {
-        wrapperEl.current &&
-          wrapperEl.current.classList.remove('right-slide-animation')
-      }, 0.4 * 1000)
       scrolls = -1 * NUMBER_OF_SCROLLS_POSSIBLE
-    } else
-      wrapperEl.current.style.transform = `translateX(calc(${100 * scrolls}%))`
+      applySlideInEdges('right-slide-animation')
+    } else applySlide(scrolls)
     setScrolls(scrolls)
   }
   useEffect(() => {
@@ -122,11 +117,7 @@ const ProductsCarousels: FC<ProductsCarouselsProps> = (props) => {
 
     fetchProducts(1, props.listingCategory).then((response) => {
       setData(response)
-      wrapperEl.current &&
-        wrapperEl.current.style.setProperty(
-          '--total-items',
-          response.length.toString()
-        )
+      setPropertyToWrapper('--total-items', response.length.toString())
       calculateLastSlide()
       if (
         response.length % 2 !== 0 ||
