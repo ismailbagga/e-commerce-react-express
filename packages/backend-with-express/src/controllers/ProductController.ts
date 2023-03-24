@@ -18,19 +18,16 @@ export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
     const listingCategory = HomeProductListingCategory.parse(req.query.listing);
     const page = HomePageNumber.parse(req.query.page);
+    console.log(listingCategory);
 
-    if (listingCategory === "top-selling") return res.status(200).json([]);
-    let orderBy: Prisma.ProductWithRatingOrderByWithRelationInput = {
+    let orderBy: Prisma.ProductRatingOrderByWithRelationInput = {
       rating: "desc",
     };
 
-    if (listingCategory === "latest") {
-      orderBy = {
-        createdAt: "desc",
-      };
-    }
+    if (listingCategory === "top-selling") orderBy = { sold: { sold: "desc" } };
+    if (listingCategory === "latest") orderBy = { createdAt: "desc" };
 
-    const products = await prismaClientInstance.productWithRating.findMany({
+    const products = await prismaClientInstance.productRating.findMany({
       orderBy,
       take: 10,
     });
@@ -53,34 +50,31 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
     const categoryId = TableId.parse(req.query.categoryId);
     const PAGE_SIZE = 10;
 
-    const where: Prisma.ProductWithRatingWhereInput = {
+    let where: Prisma.ProductRatingWhereInput = {
       title: { contains: term, mode: "insensitive" },
       rating: { gte: rating },
       price: { lte: minPrice, gte: maxPrice },
-      CategoriesOnProducts: { some: { categoryId } },
     };
+    if (categoryId)
+      where = { ...where, CategoriesOnProducts: { some: { categoryId } } };
     const pagination = {
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
     };
-
-    if (listingCategory === "top-selling") {
-      return res.status(200).json({ count: 50, products: [] });
-    }
-
-    let orderBy: Prisma.ProductWithRatingOrderByWithRelationInput = {
+    let orderBy: Prisma.ProductRatingOrderByWithRelationInput = {
       rating: "desc",
     };
-
-    if (listingCategory === "latest") {
+    let select: Prisma.ProductRatingSelect;
+    if (listingCategory === "top-selling")
       orderBy = {
-        createdAt: "desc",
+        sold: { sold: "desc" },
       };
-    }
-    const products = await prismaClientInstance.productWithRating.findMany({
+
+    if (listingCategory === "latest") orderBy = { createdAt: "desc" };
+
+    const products = await prismaClientInstance.productRating.findMany({
       where,
       orderBy,
-
       ...pagination,
     });
     res.status(200).json(products);

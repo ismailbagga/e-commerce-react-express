@@ -8,7 +8,7 @@ export const loadAllCategories: RequestHandler = async (req, res, next) => {
   const categories = await prisma.category.findMany({
     select: {
       id: true,
-      title: true,
+      title: true, 
     },
   });
   return res.json(categories).status(200);
