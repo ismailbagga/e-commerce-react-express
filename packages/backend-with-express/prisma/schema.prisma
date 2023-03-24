@@ -15,6 +15,7 @@ model User {
   firstName String   @db.VarChar(255)
   lastName  String   @db.VarChar(255)
   password  String   @db.VarChar(500)
+  Order     Order[]
   rating    rating[]
 }
 
@@ -37,8 +38,9 @@ model Product {
   price       Decimal                @default(0) @db.Decimal(8, 2)
   createdAt   DateTime?              @default(now())
   updatedAt   DateTime?              @updatedAt
-  rating      rating[]
+  CartItem    CartItem[]
   categories  CategoriesOnProducts[] @relation("ProductOfCate")
+  rating      rating[]
 }
 
 model Category {
@@ -50,27 +52,62 @@ model Category {
 }
 
 model CategoriesOnProducts {
-  productId         Int
-  categoryId        Int
-  product           Product           @relation(name: "ProductOfCate", fields: [productId], references: [id])
-  category          Category          @relation(fields: [categoryId], references: [id])
-  // This Constraint will be removed from migration
-  productWithRating ProductWithRating @relation(fields: [productId], references: [id], map: "categories_on_product_with_rating")
+  productId     Int
+  categoryId    Int
+  category      Category      @relation(fields: [categoryId], references: [id])
+  product       Product       @relation("ProductOfCate", fields: [productId], references: [id])
+  productRating ProductRating @relation(fields: [productId], references: [id], map: "product_rating_pk")
 
   @@id([productId, categoryId])
 }
 
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
-view ProductWithRating {
-  id                   Int                    @unique
-  title                String?                @db.VarChar(255)
-  slug                 String?                @db.VarChar(300)
-  url                  String?                @db.VarChar(255)
-  price                Decimal?               @db.Decimal(8, 2)
-  createdAt            DateTime?
-  rating               Decimal?               @db.Decimal(5, 2)
-  total_votes          Int?
-  CategoriesOnProducts CategoriesOnProducts[]
+model Cart {
+  uuid      String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  state     Boolean    @default(false)
+  CartItem  CartItem[]
+  Order     Order?
+}
 
-  @@map("productwithrating")
+model CartItem {
+  cartId     String
+  productId  Int
+  quantity   Int
+  totalPrice Decimal @db.Money
+  cart       Cart    @relation(fields: [cartId], references: [uuid])
+  product    Product @relation(fields: [productId], references: [id])
+
+  @@id([cartId, productId])
+}
+
+model Order {
+  orderId    String    @id
+  orderedAt  DateTime  @default(now())
+  recievedAt DateTime?
+  userId     Int
+  cart       Cart      @relation(fields: [orderId], references: [uuid])
+  user       User      @relation(fields: [userId], references: [id])
+}
+
+view ProductRating {
+  id                   Int                    @id
+  title                String                 @db.VarChar(255)
+  slug                 String                 @db.VarChar(300)
+  description          String
+  url                  String                 @db.VarChar(255)
+  price                Decimal                @db.Decimal(8, 2)
+  createdAt            DateTime
+  updatedAt            DateTime
+  rating               Decimal                @db.Decimal(5, 2)
+  total_votes          Int
+  CategoriesOnProducts CategoriesOnProducts[]
+  sold                 ProductsSold           @relation(fields: [id], references: [id])
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+view ProductsSold {
+  id            Int            @id
+  sold          Int
+  ProductRating ProductRating?
 }
