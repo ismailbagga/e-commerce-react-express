@@ -16,10 +16,7 @@ export type ProductPaginationResult = {
 }
 const ProductCard: FC<{ product: Product }> = ({ product }) => {
   const headerRef = useRef<HTMLHeadingElement>(null)
-  useEffect(() => {
-    // abc def
-    // 2derRef.current?.innerHTML)
-  }, [])
+  useEffect(() => {}, [])
 
   return (
     <div className="w-[calc(100%/var(--items-per-scroll))] shrink-0 px-3 ">
@@ -130,35 +127,33 @@ const ProductsCarousels: FC<ProductsCarouselsProps> = (props) => {
   }, [])
 
   return (
-    <section className="mx-auto mt-10">
-      <main className="relative mx-4 ">
-        <nav className="mb-5 h-10">
-          <h1 className=" text-4xl font-bold">{props.title}</h1>
-        </nav>
-        <div className="mx-auto flex  space-x-3 overflow-hidden">
-          <button
-            onClick={() => scrollCarousel('LEFT')}
-            className="z-40 flex w-16 cursor-pointer   items-center  justify-center  rounded border bg-black/40 px-3 "
-          >
-            <img src={LeftArrow} className="w-10" />
-          </button>
-          <div
-            ref={wrapperEl}
-            className={`slider sm:  relative flex min-w-[calc(100%-8rem)]    items-stretch  
-         transition-transform [--items-per-scroll:1]    md:[--items-per-scroll:2]  lg:[--items-per-scroll:3]  2xl:[--items-per-scroll:4]`}
-          >
-            {data.map((pr) => (
-              <ProductCard key={pr.id} product={pr} />
-            ))}
-          </div>
-
-          <button
-            onClick={() => scrollCarousel('RIGHT')}
-            className="z-40 flex w-16 cursor-pointer  items-center  justify-center  rounded border bg-black/40 px-3 "
-          >
-            <img className="w-10" src={RightArrow} />
-          </button>
+    <section className="mx-auto mt-10 max-w-[75rem] ">
+      <nav className="mb-5">
+        <h1 className="text-4xl font-bold">{props.title}</h1>
+      </nav>
+      <main className="mx-auto flex overflow-hidden">
+        <button
+          onClick={() => scrollCarousel('LEFT')}
+          className="z-40 flex w-16 shrink-0 cursor-pointer items-center justify-center rounded border bg-black/50 px-3 "
+        >
+          <img src={LeftArrow} className="w-10" />
+        </button>
+        <div
+          ref={wrapperEl}
+          className={`slider   flex w-[calc(100%-8rem)]   items-stretch
+         transition-transform [--items-per-scroll:1] md:[--items-per-scroll:2]  lg:[--items-per-scroll:3]  2xl:[--items-per-scroll:4]`}
+        >
+          {data.map((pr) => (
+            <ProductCard key={pr.id} product={pr} />
+          ))}
         </div>
+
+        <button
+          onClick={() => scrollCarousel('RIGHT')}
+          className="z-40 flex w-16 shrink-0 cursor-pointer  items-center  justify-center  rounded border bg-black/50 px-3 "
+        >
+          <img className="w-10" src={RightArrow} />
+        </button>
       </main>
     </section>
   )

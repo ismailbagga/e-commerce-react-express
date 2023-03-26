@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 html {
-  font-size: 16px ; 
+  font-size: 16px;
 }
 body {
-  @apply bg-gray-200  overflow-y-scroll;
+  @apply overflow-y-scroll  bg-gray-200;
 }
 input {
-  @apply outline-none border-none;
+  /* @apply outline-none border-none; */
 }

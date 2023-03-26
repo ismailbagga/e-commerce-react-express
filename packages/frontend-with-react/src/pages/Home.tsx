@@ -3,7 +3,7 @@ import ProductsCarousels from '../components/products/ProductsCarousel'
 
 const HomePage = () => {
   return (
-    <h1>
+    <section>
       <ProductsCarousels listingCategory="latest" title="Latest Products" />
       <ProductsCarousels
         listingCategory="top-rated"
@@ -13,7 +13,7 @@ const HomePage = () => {
         listingCategory="top-selling"
         title="Top Selling Products"
       />
-    </h1>
+    </section>
   )
 }
 
