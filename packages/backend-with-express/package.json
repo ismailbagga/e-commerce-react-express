@@ -1,5 +1,5 @@
 {
-  "name": "@root/backend-with-express",
+  "name": "@site-wrapper/backend-with-express",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
