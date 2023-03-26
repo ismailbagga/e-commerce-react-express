@@ -2,8 +2,17 @@
   "name": "site-wrapper",
   "private": "true",
   "version": "1.0.0",
+  "scripts": {
+    "client": "npm run dev  -w packages/frontend-with-react",
+    "server": "npm start  -w packages/backend-with-express",
+    "start-all": "concurrently -kill-others \" npm run client \" \" npm run server \"  "
+  },
   "workspaces": [
-    "packages/*"
+    "packages/backend-with-express",
+    "packages/frontend-with-react",
+    "packages/common"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
 }
