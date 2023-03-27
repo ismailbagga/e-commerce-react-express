@@ -5,7 +5,8 @@
   "scripts": {
     "client": "npm run dev  -w packages/frontend-with-react",
     "server": "npm start  -w packages/backend-with-express",
-    "start-all": "concurrently -kill-others \" npm run client \" \" npm run server \"  "
+    "compile:server": "npm run compile:watch -w packages/backend-with-express",
+    "start-all": "concurrently -kill-others \" npm run client \" \"  npm run compile:server \" \" npm run server \"  "
   },
   "workspaces": [
     "packages/backend-with-express",
