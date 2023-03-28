@@ -2,7 +2,7 @@
   "name": "@site-wrapper/backend-with-express",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/app.js",
   "scripts": {
     "compile": "tsc",
     "compile:watch": "tsc --watch",
