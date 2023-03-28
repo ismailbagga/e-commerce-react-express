@@ -5,7 +5,7 @@ export const ProductUpload = z.object({
   title: z.string(),
   description: z.string(),
   url: z.string(),
-  price: z.number().min(0, "price must be positive"),
+  price: z.number().min(0, "price  must be positive"),
   categories: z.array(z.number().min(1)).optional(),
 });
 export type Product = {
@@ -18,6 +18,18 @@ export type Product = {
   createdAt: Date | null;
   updatedAt: Date | null;
 };
+export type ProductRating = {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  url: string;
+  price: number;
+  createdAt: Date;
+  updatedAt: Date;
+  rating: number;
+  total_votes: number;
+};
 
 export type ProductPaginationResult = {
   count: number;
@@ -26,15 +38,15 @@ export type ProductPaginationResult = {
 
 export type ProductPreview = { ratingCount: number; rating: number } & Product;
 
-export const RatingLevel = z.coerce
-  .number()
-  .min(1, "rating must be less then 1")
-  .max(4, "rating can be bigger then 4")
+export const RatingLevelValidator = z
+  .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
   .optional();
-export const Price = z.coerce
+export type RatingLevel = z.infer<typeof RatingLevelValidator>;
+export const priceValidator = z.coerce
   .number()
   .min(1, "Price Must Be more then 1$")
-  .optional();
+  .optional()
+  .catch(undefined);
 
 export const HomePageNumber = z.coerce
   .number()
@@ -49,15 +61,9 @@ export const SearchPageNumber = z
 // type ProductBody = z.infer<typeof ProductBody>;
 
 export const HomeProductListingCategoryValidator = z
-  .union([
-    z.literal("latest"),
-    z.literal("top-selling"),
-    z.literal("top-rated"),
-  ])
+  .union([z.literal("latest"), z.literal("top-selling"), z.literal("top-rated")])
   .default("latest");
-export type HomeProductListingCategory = z.infer<
-  typeof HomeProductListingCategoryValidator
->;
+export type HomeProductListingCategory = z.infer<typeof HomeProductListingCategoryValidator>;
 export const SearchProductListingCategory = z
   .union([z.literal("latest"), z.literal("top-selling"), z.literal("featured")])
   .default("latest");

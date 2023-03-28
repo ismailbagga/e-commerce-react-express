@@ -4,6 +4,7 @@ import SearchIcon from '../assets/icons/search.png'
 import BarIcon from '../assets/icons/bars.png'
 import CloseIcon from '../assets/icons/close.png'
 import axiosClient from '../setup/axiosClient'
+import { useAppContext } from '../contexts/AppContext'
 
 export type PrimaryCategory = {
   id: number
@@ -15,6 +16,7 @@ const fetchAllCategories = async () => {
 }
 export const NavSearchForm = () => {
   const searchEl = useRef<HTMLInputElement>(null)
+  const { onTermChange } = useAppContext()
   const [categories, setCategories] = useState<PrimaryCategory[]>([])
   useEffect(() => {
     fetchAllCategories().then((data) => setCategories(data))
@@ -22,7 +24,7 @@ export const NavSearchForm = () => {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault()
-    console.log(searchEl.current?.value)
+    onTermChange(searchEl.current?.value ?? '')
   }
   return (
     <div className="absolute top-[7rem] right-[50%] flex  h-10 translate-x-[50%]  md:static md:translate-x-0 ">
