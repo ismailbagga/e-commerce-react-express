@@ -64,8 +64,6 @@ export const ProductSearchListing = () => {
 
     onPageChange(page)
   }
-  // const {}
-  //  1  5           17 18 19  20
   return (
     <section className="flex flex-col  items-center space-y-10  pb-10">
       {productsFound.map((p) => (
