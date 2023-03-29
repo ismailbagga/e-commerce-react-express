@@ -38,10 +38,8 @@ export type ProductPaginationResult = {
 
 export type ProductPreview = { ratingCount: number; rating: number } & Product;
 
-export const RatingLevelValidator = z
-  .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
-  .optional();
-export type RatingLevel = z.infer<typeof RatingLevelValidator>;
+export const RatingLevelValidator = z.coerce.number().min(1).max(4).optional();
+export type RatingLevel = 1 | 2 | 3 | 4 | undefined;
 export const priceValidator = z.coerce
   .number()
   .min(1, "Price Must Be more then 1$")
@@ -67,3 +65,4 @@ export type HomeProductListingCategory = z.infer<typeof HomeProductListingCatego
 export const SearchProductListingCategory = z
   .union([z.literal("latest"), z.literal("top-selling"), z.literal("featured")])
   .default("latest");
+export type ProductListing = z.infer<typeof SearchProductListingCategory>;

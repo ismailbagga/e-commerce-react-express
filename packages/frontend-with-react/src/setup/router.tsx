@@ -1,7 +1,8 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import HomePage from '../pages/Home'
 import PublicLayout from '../entry/PublicLayout'
-import FilterPage from '../pages/FilterPage'
+import FilterPage from '../pages/ProductSearchPage'
+import ProductSearchPage from '../pages/ProductSearchPage'
 
 export const router = createBrowserRouter([
   {
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'search',
-        element: <FilterPage />,
+        element: <ProductSearchPage />,
       },
     ],
   },

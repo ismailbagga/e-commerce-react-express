@@ -39,6 +39,7 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
   try {
     const listingCategory = SearchProductListingCategory.parse(req.query.listing);
     const term = req.query.term as string;
+    console.log(req.query.rating);
     const rating = RatingLevelValidator.parse(req.query.rating);
     const minPrice = priceValidator.parse(req.query.minPrice);
     const maxPrice = priceValidator.parse(req.query.maxPrice);

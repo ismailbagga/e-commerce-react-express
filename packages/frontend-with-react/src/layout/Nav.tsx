@@ -1,4 +1,12 @@
-import React, { FC, FormEventHandler, useEffect, useRef, useState } from 'react'
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  FC,
+  FormEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Link } from 'react-router-dom'
 import SearchIcon from '../assets/icons/search.png'
 import BarIcon from '../assets/icons/bars.png'
@@ -16,35 +24,39 @@ const fetchAllCategories = async () => {
 }
 export const NavSearchForm = () => {
   const searchEl = useRef<HTMLInputElement>(null)
-  const { onTermChange } = useAppContext()
+  const { onTermChange, onCategoryIdChange } = useAppContext()
   const [categories, setCategories] = useState<PrimaryCategory[]>([])
+  const [selectedCategory, selectCategory] = useState<string>('ALL')
   useEffect(() => {
     fetchAllCategories().then((data) => setCategories(data))
   }, [])
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault()
+    if (selectedCategory === 'ALL') onCategoryIdChange(undefined)
+    else onCategoryIdChange(parseInt(selectedCategory))
     onTermChange(searchEl.current?.value ?? '')
   }
   return (
     <div className="absolute top-[7rem] right-[50%] flex  h-10 translate-x-[50%]  md:static md:translate-x-0 ">
-      <select
-        placeholder="Categories"
-        className="rounded-l bg-gray-300 px-1 "
-        defaultValue="ALL"
-      >
-        <option value="ALL">All</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.title}>
-            {c.title}
-          </option>
-        ))}
-      </select>
       <form
-        className="flex items-center rounded-r bg-white pl-2"
+        className="flex items-center rounded-r bg-white "
         onSubmit={handleSubmit}
       >
-        <button type="submit" className="shrink-0">
+        <select
+          onChange={(e) => selectCategory(e.target.value)}
+          value={selectedCategory}
+          placeholder="Categories"
+          className="h-full rounded-l bg-gray-300 px-1 pl-2"
+        >
+          <option value="ALL">All</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.title}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="shrink-0 pl-2">
           <img className="h-8" src={SearchIcon} alt="Search" />
         </button>
         <input
@@ -123,7 +135,7 @@ const Nav = () => {
       <NavSearchForm />
       <ul className="hidden items-center space-x-3 lg:flex  ">
         <NavLink href="home" text="Home" />
-        <NavLink href="products" text="Products" />
+        <NavLink href="search" text="Search" />
         <NavLink href="about" text="About" />
         <Link
           className=" rounded bg-blue-700 py-[calc(2px+0.25rem)] px-5 font-semibold text-white"
