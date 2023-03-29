@@ -51,7 +51,7 @@ export const HomePageNumber = z.coerce
   .min(1)
   .max(4)
   .catch(() => 1);
-export const SearchPageNumber = z
+export const SearchPageNumber = z.coerce
   .number()
   .min(1)
   .catch(() => 1);

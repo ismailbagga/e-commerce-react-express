@@ -5,16 +5,19 @@ import prismaClientInstance from "../utils/prisma-client";
 import ApiError from "./ApiError";
 import slugify from "slugify";
 import {
+  ProductUpload,
+  RatingLevelValidator,
+  TableId,
+  priceValidator,
   HomePageNumber,
-  HomeProductListingCategory,
   SearchPageNumber,
+  HomeProductListingCategoryValidator,
   SearchProductListingCategory,
-} from "../types/products-t-v";
-import { ProductUpload, RatingLevelValidator, TableId, priceValidator } from "@site-wrapper/common";
+} from "@site-wrapper/common";
 
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
-    const listingCategory = HomeProductListingCategory.parse(req.query.listing);
+    const listingCategory = HomeProductListingCategoryValidator.parse(req.query.listing);
     const page = HomePageNumber.parse(req.query.page);
     console.log(listingCategory);
 
@@ -45,7 +48,8 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
     const maxPrice = priceValidator.parse(req.query.maxPrice);
     const page = SearchPageNumber.parse(req.query.page);
     const categoryId = TableId.parse(req.query.categoryId);
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 1;
+    console.log(page);
 
     let where: Prisma.ProductRatingWhereInput = {
       title: { contains: term, mode: "insensitive" },
@@ -67,13 +71,17 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
       };
 
     if (listingCategory === "latest") orderBy = { createdAt: "desc" };
-
-    const products: ProductRating[] = await prismaClientInstance.productRating.findMany({
+    const productsCount = await prismaClientInstance.productRating.aggregate({
+      _count: { _all: true },
+      where,
+      orderBy,
+    });
+    const products = await prismaClientInstance.productRating.findMany({
       where,
       orderBy,
       ...pagination,
     });
-    res.status(200).json(products);
+    res.status(200).json({ productsCount, products });
   } catch (err) {
     next(err);
   }

@@ -5,6 +5,7 @@ export type PricePayload = {
 }
 
 export type FilterState = {
+  page: number
   price: PricePayload
   term: string
   rating: RatingLevel
@@ -32,7 +33,12 @@ export type ProductReducerActions =
       type: 'CHANGE-LISTING-TYPE'
       payload: ProductListing
     }
+  | {
+      type: 'CHANGE-PAGE'
+      payload: number
+    }
 export const initialState: FilterState = {
+  page: 1,
   term: '',
   price: { minPrice: 0, maxPrice: undefined },
   rating: undefined,
@@ -59,5 +65,7 @@ export const ProductFilterReducer: ProductFilterReducerFn = (
     return { ...prevState, listing: action.payload }
   if (action.type === 'CHANGE-CATEGORY-ID')
     return { ...prevState, categoryId: action.payload }
+  if (action.type === 'CHANGE-PAGE')
+    return { ...prevState, page: action.payload }
   return prevState
 }
