@@ -6,7 +6,8 @@
     "client": "npm run dev  -w packages/frontend-with-react",
     "server": "npm start  -w packages/backend-with-express",
     "compile:server": "npm run compile:watch -w packages/backend-with-express",
-    "start-all": "concurrently -kill-others \" npm run client \" \"  npm run compile:server \" \" npm run server \"  "
+    "compile:common": "npm run compile:watch -w packages/common ",
+    "start-all": "concurrently -kill-others \" npm run compile:common \" \" npm run client \" \"  npm run compile:server \" \" npm run server \"  "
   },
   "workspaces": [
     "packages/backend-with-express",

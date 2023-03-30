@@ -1,22 +1,23 @@
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductRating } from "@prisma/client";
 import { RequestHandler } from "express";
 import prismaClientInstance from "../utils/prisma-client";
 import ApiError from "./ApiError";
 import slugify from "slugify";
 import {
+  ProductUpload,
+  RatingLevelValidator,
+  TableId,
+  priceValidator,
   HomePageNumber,
-  HomeProductListingCategory,
-  Price,
-  RatingLevel,
   SearchPageNumber,
+  HomeProductListingCategoryValidator,
   SearchProductListingCategory,
-} from "../types/products-t-v";
-import { ProductUpload, TableId } from "@site-wrapper/common";
+} from "@site-wrapper/common";
 
 export const getHomePageProducts: RequestHandler = async (req, res, next) => {
   try {
-    const listingCategory = HomeProductListingCategory.parse(req.query.listing);
+    const listingCategory = HomeProductListingCategoryValidator.parse(req.query.listing);
     const page = HomePageNumber.parse(req.query.page);
     console.log(listingCategory);
 
@@ -39,24 +40,23 @@ export const getHomePageProducts: RequestHandler = async (req, res, next) => {
 
 export const searchForProducts: RequestHandler = async (req, res, next) => {
   try {
-    const listingCategory = SearchProductListingCategory.parse(
-      req.query.listing
-    );
+    const listingCategory = SearchProductListingCategory.parse(req.query.listing);
     const term = req.query.term as string;
-    const rating = RatingLevel.parse(req.query.rating);
-    const minPrice = Price.parse(req.query.minPrice);
-    const maxPrice = Price.parse(req.query.maxPrice);
+    const rating = RatingLevelValidator.parse(req.query.rating);
+    const minPrice = priceValidator.parse(req.query.minPrice);
+    const maxPrice = priceValidator.parse(req.query.maxPrice);
     const page = SearchPageNumber.parse(req.query.page);
     const categoryId = TableId.parse(req.query.categoryId);
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 6;
+    console.log("Min Price ", minPrice);
+    console.log("max Price ", maxPrice);
 
     let where: Prisma.ProductRatingWhereInput = {
       title: { contains: term, mode: "insensitive" },
       rating: { gte: rating },
-      price: { lte: minPrice, gte: maxPrice },
+      price: { gte: minPrice, lte: maxPrice },
     };
-    if (categoryId)
-      where = { ...where, CategoriesOnProducts: { some: { categoryId } } };
+    if (categoryId) where = { ...where, CategoriesOnProducts: { some: { categoryId } } };
     const pagination = {
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
@@ -71,13 +71,17 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
       };
 
     if (listingCategory === "latest") orderBy = { createdAt: "desc" };
-
+    const productsCount = await prismaClientInstance.productRating.aggregate({
+      _count: { _all: true },
+      where,
+      orderBy,
+    });
     const products = await prismaClientInstance.productRating.findMany({
       where,
       orderBy,
       ...pagination,
     });
-    res.status(200).json(products);
+    res.status(200).json({ productsCount, products });
   } catch (err) {
     next(err);
   }
@@ -93,8 +97,7 @@ export const saveProduct: RequestHandler = async (req, res, next) => {
       slug: productSlug,
     },
   });
-  if (product)
-    return next(new ApiError("product with this title already exists", 405));
+  if (product) return next(new ApiError("product with this title already exists", 405));
   try {
     if (data.categories) {
       const categoriesCount = await prismaClientInstance.category.aggregate({
@@ -121,9 +124,7 @@ export const saveProduct: RequestHandler = async (req, res, next) => {
     if (data.categories)
       await prismaClientInstance.$executeRaw`INSERT INTO public."CategoriesOnProducts"("productId", "categoryId")
 	              VALUES ${Prisma.join(
-                  data.categories.map(
-                    (id) => Prisma.sql`(${Prisma.join([newProduct.id, id])})`
-                  )
+                  data.categories.map((id) => Prisma.sql`(${Prisma.join([newProduct.id, id])})`)
                 )};`;
     res.status(201).json(newProduct);
   } catch (err) {

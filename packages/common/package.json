@@ -2,6 +2,9 @@
   "name": "@site-wrapper/common",
   "version": "1.0.0",
   "main": "./dist/index.js",
+  "scripts": {
+    "compile:watch": "tsc --watch"
+  },
   "license": "ISC",
   "dependencies": {
     "zod": "^3.21.4"
