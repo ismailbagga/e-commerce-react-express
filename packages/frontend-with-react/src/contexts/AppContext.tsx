@@ -12,11 +12,12 @@ import {
   initialState,
 } from '../reducers/ProductsFilterReducer'
 import axiosClient from '../setup/axiosClient'
+import { useSearchParams } from 'react-router-dom'
 
 const AppContext = React.createContext({
   productsFound: [] as ProductRating[],
   productCount: 0,
-  productsFilterState: initialState,
+  loading: true,
   onPageChange: (page: number) => {},
   onRatingChange: (rating: RatingLevel) => {},
   onPriceChange: (price: PricePayload) => {},
@@ -34,69 +35,73 @@ type ProductResult = {
   products: ProductRating[]
 }
 export const AppContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const [loading, setLoading] = useState(true)
+  const [searchParams, setSearchParams] = useSearchParams({
+    term: '',
+    page: '1',
+  })
   const [productsFound, setProductsFound] = useState<ProductRating[]>([])
   const [productCount, setProductsCount] = useState(0)
-  const [productsFilterState, dispatcher] = useReducer(
-    ProductFilterReducer,
-    initialState
-  )
-
+  const changeParams = (key: string, value: string) => {
+    setSearchParams((prevParams) => {
+      prevParams.set(key, value)
+      return prevParams
+    })
+  }
+  const removeParam = (key: string) => {
+    setSearchParams((prev) => {
+      prev.delete(key)
+      return prev
+    })
+  }
   const onTermChange = (term: string) => {
-    dispatcher({ type: 'CHANGE-TERM', payload: term })
+    changeParams('term', term)
   }
   const onRatingChange = (rating: RatingLevel) => {
-    dispatcher({ type: 'CHANGE-RATING', payload: rating })
+    if (!rating) removeParam('rating')
+    else changeParams('rating', rating.toString())
   }
   const onPriceChange = (price: PricePayload) => {
-    dispatcher({ type: 'CHANGE-PRICE', payload: price })
+    if (price.minPrice) {
+      const min = price.minPrice
+      changeParams('minPrice', min.toString())
+    } else removeParam('minPrice')
+
+    if (price.maxPrice) {
+      const max = price.maxPrice
+      changeParams('maxPrice', max.toString())
+    } else removeParam('maxPrice')
   }
   const onCategoryIdChange = (categoryId: number | undefined) => {
-    dispatcher({ type: 'CHANGE-CATEGORY-ID', payload: categoryId })
+    if (categoryId) changeParams('categoryId', categoryId.toString())
+    else removeParam('categoryId')
   }
   const onListingChange = (listing: ProductListing) => {
-    dispatcher({ type: 'CHANGE-LISTING-TYPE', payload: listing })
+    changeParams('listing', listing)
   }
   const onPageChange = (page: number) => {
-    dispatcher({ type: 'CHANGE-PAGE', payload: page })
+    changeParams('page', page.toString())
   }
   const searchForProducts = async () => {
-    let params = {}
-    if (productsFilterState.price.minPrice)
-      params = { ...params, minPrice: productsFilterState.price.minPrice }
-    if (productsFilterState.price.maxPrice)
-      params = { ...params, maxPrice: productsFilterState.price.maxPrice }
-    if (productsFilterState.term && productsFilterState.term.trim() !== '')
-      params = { ...params, term: productsFilterState.term }
-    if (productsFilterState.rating)
-      params = { ...params, rating: productsFilterState.rating }
-    if (productsFilterState.price.minPrice)
-      params = { ...params, minPrice: productsFilterState.price.minPrice }
-    if (productsFilterState.listing)
-      params = { ...params, listing: productsFilterState.listing }
-    if (productsFilterState.categoryId)
-      params = { ...params, categoryId: productsFilterState.categoryId }
-    params = { ...params, page: productsFilterState.page }
     const response = await axiosClient.get<ProductResult>('/products/search', {
-      params,
+      params: searchParams,
     })
     return response.data
   }
   useEffect(() => {
-    console.log('state changed')
-
     searchForProducts().then((result) => {
-      console.log(result.productsCount._count._all)
-
+      setLoading(false)
       setProductsCount(result.productsCount._count._all)
       setProductsFound(result.products)
+      window.scroll(0, 0)
     })
-  }, [productsFilterState])
+  }, [searchParams])
   return (
     <AppContext.Provider
       value={{
+        loading,
         productsFound,
         productCount,
-        productsFilterState,
         onTermChange,
         onRatingChange,
         onPriceChange,

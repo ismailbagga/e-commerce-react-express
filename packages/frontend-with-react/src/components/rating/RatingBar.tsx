@@ -1,17 +1,12 @@
-import { RatingLevel } from '@site-wrapper/common'
 import { FC } from 'react'
 import GOLD_STAR from '../../assets/icons/gold-star.png'
 import WHITE_STAR from '../../assets/icons/white-star.png'
 export const RatingBar: FC<{
   rating: number
-  onClickHandler: (rating: number) => void
-}> = ({ rating, onClickHandler }) => {
+}> = ({ rating }) => {
   const STARS = [...new Array(5).keys()]
   return (
-    <button
-      className="flex w-fit space-x-1 border-2 border-transparent hover:border-red-600"
-      onClick={(e) => onClickHandler(rating)}
-    >
+    <div className="flex w-fit space-x-1 border-2 border-transparent">
       {STARS.map((val, index) => {
         return (
           <span key={val}>
@@ -22,6 +17,6 @@ export const RatingBar: FC<{
           </span>
         )
       })}
-    </button>
+    </div>
   )
 }

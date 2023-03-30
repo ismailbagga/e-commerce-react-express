@@ -4,6 +4,7 @@ import { RatingBox } from '../components/rating/RatingBox'
 import { ProductPriceForm } from '../components/products/ProductPriceForm'
 import { useAppContext } from '../contexts/AppContext'
 import { ProductListing } from '@site-wrapper/common'
+import { useSearchParams } from 'react-router-dom'
 
 const SearchHeader: FC<{ text: string }> = ({ text }) => {
   return <h1 className="mb-3 text-xl font-bold">{text}</h1>
@@ -11,9 +12,11 @@ const SearchHeader: FC<{ text: string }> = ({ text }) => {
 
 const ListingDropDown = () => {
   const { onListingChange } = useAppContext()
+  const params = useSearchParams()[0]
   return (
     <select
       className="rounded bg-gray-300 px-2"
+      value={params.get('listing') ?? 'latest'}
       onChange={(e) => onListingChange(e.target.value as ProductListing)}
     >
       <option value="latest">Sort By : Latest</option>

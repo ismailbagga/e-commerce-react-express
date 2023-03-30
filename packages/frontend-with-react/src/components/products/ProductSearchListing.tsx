@@ -1,6 +1,6 @@
 import { ProductRating } from '@site-wrapper/common'
 import { FC } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAppContext } from '../../contexts/AppContext'
 import { RatingBar } from '../rating/RatingBar'
 import LeftArrow from '../../assets/icons/l-arrow.svg'
@@ -23,10 +23,7 @@ const ProductSearchCard: FC<{ product: ProductRating }> = ({ product }) => {
           {product.description}
         </p>
         <div className="mt-2 flex items-center space-x-2">
-          <RatingBar
-            rating={Math.floor(product.rating)}
-            onClickHandler={() => {}}
-          />
+          <RatingBar rating={Math.floor(product.rating)} />
           <h5 className="text-xl">1256</h5>
         </div>
         <p className="mt-2 text-2xl font-bold">${product.price}</p>
@@ -42,9 +39,12 @@ const PaginationButton: FC<{
 }> = ({ text, onClick, isFocus }) => {
   return (
     <button
-      className={`mx-2 h-14 w-16 rounded border-2 border-transparent text-gray-500     ${
-        isFocus ? 'border-gray-700 text-black' : ''
-      }`}
+      className={`mx-2 h-14 w-[3rem] rounded border-2 
+         ${
+           isFocus
+             ? 'border-black text-black'
+             : 'border-transparent text-gray-500'
+         }`}
       onClick={(e) => onClick(text)}
     >
       {text}
@@ -52,11 +52,27 @@ const PaginationButton: FC<{
   )
 }
 
+const ProductsList: FC<{ products: ProductRating[]; loading: boolean }> = ({
+  loading,
+  products,
+}) => {
+  if (loading) return <h1>Loading ...</h1>
+  if (!loading && products.length === 0) return <h1>No Products Was Found </h1>
+  return (
+    <>
+      {products.map((p) => (
+        <ProductSearchCard key={p.id} product={p} />
+      ))}
+    </>
+  )
+}
+
+const PAGE_SIZE = 6
 export const ProductSearchListing = () => {
-  const { productsFound, productCount, onPageChange, productsFilterState } =
-    useAppContext()
-  const lastPage = Math.ceil(productCount / 1)
-  const pageSelected = productsFilterState.page
+  const { productsFound, productCount, onPageChange, loading } = useAppContext()
+  const params = useSearchParams()[0]
+  const lastPage = Math.ceil(productCount / PAGE_SIZE)
+  const pageSelected = parseInt(params.get('page') ?? '1')
   const buttonArray = [...new Array(lastPage).keys()]
   const onClickHandler = (page: number | string) => {
     if (typeof page === 'string') return
@@ -66,81 +82,85 @@ export const ProductSearchListing = () => {
   }
   return (
     <section className="flex flex-col  items-center space-y-10  pb-10">
-      {productsFound.map((p) => (
-        <ProductSearchCard key={p.id} product={p} />
-      ))}
-      <footer
-        className="flex h-14 items-center rounded border-2 border-gray-500 px-2 shadow"
-        id="pagination"
-      >
-        <button
-          className="px-5"
-          onClick={() => onClickHandler(productsFilterState.page - 1)}
+      <ProductsList products={productsFound} loading={loading} />
+      {!loading && productsFound.length !== 0 && (
+        <footer
+          className="flex h-14 items-center rounded border-2 border-gray-500 px-2 shadow"
+          id="pagination"
         >
-          <img className="w-8" src={LeftArrow} />
-        </button>
-        {pageSelected > 4 && (
-          <PaginationButton isFocus={false} text={1} onClick={onClickHandler} />
-        )}
-        {pageSelected > 4 && pageSelected <= lastPage - 4 && (
-          <PaginationButton isFocus={false} text=".." onClick={() => {}} />
-        )}
-        {buttonArray.map((page) => {
-          const currBtnPage = page + 1
-          let visibleLeftBtn = 1
-          let visibleRightBtn = 2
+          <button
+            className="px-5"
+            onClick={() => onClickHandler(pageSelected - 1)}
+          >
+            <img className="w-8" src={LeftArrow} />
+          </button>
+          {pageSelected > 4 && (
+            <PaginationButton
+              isFocus={false}
+              text={1}
+              onClick={onClickHandler}
+            />
+          )}
+          {pageSelected > 4 && pageSelected <= lastPage - 4 && (
+            <PaginationButton isFocus={false} text=".." onClick={() => {}} />
+          )}
+          {buttonArray.map((page) => {
+            const currBtnPage = page + 1
+            let visibleLeftBtn = 1
+            let visibleRightBtn = 2
 
-          if (pageSelected > 1 && pageSelected < 5) {
-            visibleLeftBtn = pageSelected - 1
-            visibleRightBtn = 1
-          }
-          if (pageSelected > 4 && pageSelected <= lastPage - 4) {
-            visibleLeftBtn = 1
-            visibleRightBtn = 1
-          }
-          if (pageSelected < lastPage && pageSelected > lastPage - 4) {
-            visibleLeftBtn = 1
-            visibleRightBtn = lastPage - pageSelected
-          }
-          if (pageSelected === lastPage) {
-            visibleLeftBtn = 2
-            visibleRightBtn = 0
-          }
-          const showIfLeftBtn =
-            currBtnPage <= pageSelected &&
-            currBtnPage >= pageSelected - visibleLeftBtn
-          const showIfRightBtn =
-            currBtnPage >= pageSelected &&
-            currBtnPage <= pageSelected + visibleRightBtn
+            if (pageSelected > 1 && pageSelected < 5) {
+              visibleLeftBtn = pageSelected - 1
+              visibleRightBtn = 1
+            }
+            if (pageSelected > 4 && pageSelected <= lastPage - 4) {
+              visibleLeftBtn = 1
+              visibleRightBtn = 1
+            }
+            if (pageSelected < lastPage && pageSelected > lastPage - 4) {
+              visibleLeftBtn = 1
+              visibleRightBtn = lastPage - pageSelected
+            }
+            if (pageSelected === lastPage) {
+              visibleLeftBtn = 2
+              visibleRightBtn = 0
+            }
+            const showIfLeftBtn =
+              currBtnPage <= pageSelected &&
+              currBtnPage >= pageSelected - visibleLeftBtn
+            const showIfRightBtn =
+              currBtnPage >= pageSelected &&
+              currBtnPage <= pageSelected + visibleRightBtn
 
-          return (
-            (showIfLeftBtn || showIfRightBtn) && (
-              <PaginationButton
-                key={page}
-                text={currBtnPage}
-                isFocus={currBtnPage === pageSelected}
-                onClick={onClickHandler}
-              />
+            return (
+              (showIfLeftBtn || showIfRightBtn) && (
+                <PaginationButton
+                  key={page}
+                  text={currBtnPage}
+                  isFocus={currBtnPage === pageSelected}
+                  onClick={onClickHandler}
+                />
+              )
             )
-          )
-        })}
-        {pageSelected > 4 && pageSelected <= lastPage - 4 && (
-          <PaginationButton isFocus={false} text=".." onClick={() => {}} />
-        )}
-        {pageSelected <= lastPage - 4 && (
-          <PaginationButton
-            isFocus={false}
-            text={lastPage}
-            onClick={onClickHandler}
-          />
-        )}
-        <button
-          className="px-5"
-          onClick={() => onClickHandler(productsFilterState.page + 1)}
-        >
-          <img className="w-8" src={RightArrow} />
-        </button>
-      </footer>
+          })}
+          {pageSelected > 4 && pageSelected <= lastPage - 4 && (
+            <PaginationButton isFocus={false} text=".." onClick={() => {}} />
+          )}
+          {pageSelected <= lastPage - 4 && (
+            <PaginationButton
+              isFocus={false}
+              text={lastPage}
+              onClick={onClickHandler}
+            />
+          )}
+          <button
+            className="px-5"
+            onClick={() => onClickHandler(pageSelected + 1)}
+          >
+            <img className="w-8" src={RightArrow} />
+          </button>
+        </footer>
+      )}
     </section>
   )
 }

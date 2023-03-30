@@ -1,18 +1,11 @@
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  FC,
-  FormEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Link } from 'react-router-dom'
+import React, { FC, FormEventHandler, useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import SearchIcon from '../assets/icons/search.png'
 import BarIcon from '../assets/icons/bars.png'
 import CloseIcon from '../assets/icons/close.png'
 import axiosClient from '../setup/axiosClient'
 import { useAppContext } from '../contexts/AppContext'
+import { buildUrlWithParams } from '../utils/product-utils'
 
 export type PrimaryCategory = {
   id: number
@@ -24,18 +17,32 @@ const fetchAllCategories = async () => {
 }
 export const NavSearchForm = () => {
   const searchEl = useRef<HTMLInputElement>(null)
+  const params = useSearchParams()[0]
+  const navigate = useNavigate()
   const { onTermChange, onCategoryIdChange } = useAppContext()
   const [categories, setCategories] = useState<PrimaryCategory[]>([])
-  const [selectedCategory, selectCategory] = useState<string>('ALL')
+  const [selectedCategory, selectCategory] = useState<string>(
+    params.get('categoryId') ?? 'ALL'
+  )
   useEffect(() => {
+    if (searchEl.current) searchEl.current.value = params.get('term') ?? ''
     fetchAllCategories().then((data) => setCategories(data))
   }, [])
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault()
-    if (selectedCategory === 'ALL') onCategoryIdChange(undefined)
-    else onCategoryIdChange(parseInt(selectedCategory))
-    onTermChange(searchEl.current?.value ?? '')
+    const term = searchEl.current?.value ?? ''
+    if (window.location.pathname === '/home') {
+      let paramsObject: any = {}
+      if (selectedCategory !== 'ALL')
+        paramsObject = { term, categoryId: selectedCategory }
+
+      navigate(buildUrlWithParams(paramsObject))
+    } else {
+      if (selectedCategory === 'ALL') onCategoryIdChange(undefined)
+      else onCategoryIdChange(parseInt(selectedCategory))
+      onTermChange(searchEl.current?.value ?? '')
+    }
   }
   return (
     <div className="absolute top-[7rem] right-[50%] flex  h-10 translate-x-[50%]  md:static md:translate-x-0 ">

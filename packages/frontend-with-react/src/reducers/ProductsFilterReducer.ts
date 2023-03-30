@@ -37,6 +37,7 @@ export type ProductReducerActions =
       type: 'CHANGE-PAGE'
       payload: number
     }
+
 export const initialState: FilterState = {
   page: 1,
   term: '',
@@ -55,6 +56,7 @@ export const ProductFilterReducer: ProductFilterReducerFn = (
   prevState,
   action
 ) => {
+  prevState.page = 1 // reset page on any change
   if (action.type === 'CHANGE-PRICE')
     return { ...prevState, price: action.payload }
   if (action.type === 'CHANGE-RATING')
@@ -67,5 +69,6 @@ export const ProductFilterReducer: ProductFilterReducerFn = (
     return { ...prevState, categoryId: action.payload }
   if (action.type === 'CHANGE-PAGE')
     return { ...prevState, page: action.payload }
+
   return prevState
 }

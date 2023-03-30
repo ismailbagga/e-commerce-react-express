@@ -7,8 +7,6 @@ import { AppContextProvider } from './contexts/AppContext'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <AppContextProvider>
-      <RouterProvider router={router} />
-    </AppContextProvider>
+    <RouterProvider router={router} />
   </React.StrictMode>
 )

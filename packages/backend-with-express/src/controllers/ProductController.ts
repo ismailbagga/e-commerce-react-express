@@ -42,19 +42,19 @@ export const searchForProducts: RequestHandler = async (req, res, next) => {
   try {
     const listingCategory = SearchProductListingCategory.parse(req.query.listing);
     const term = req.query.term as string;
-    console.log(req.query.rating);
     const rating = RatingLevelValidator.parse(req.query.rating);
     const minPrice = priceValidator.parse(req.query.minPrice);
     const maxPrice = priceValidator.parse(req.query.maxPrice);
     const page = SearchPageNumber.parse(req.query.page);
     const categoryId = TableId.parse(req.query.categoryId);
-    const PAGE_SIZE = 1;
-    console.log(page);
+    const PAGE_SIZE = 6;
+    console.log("Min Price ", minPrice);
+    console.log("max Price ", maxPrice);
 
     let where: Prisma.ProductRatingWhereInput = {
       title: { contains: term, mode: "insensitive" },
       rating: { gte: rating },
-      price: { lte: minPrice, gte: maxPrice },
+      price: { gte: minPrice, lte: maxPrice },
     };
     if (categoryId) where = { ...where, CategoriesOnProducts: { some: { categoryId } } };
     const pagination = {
