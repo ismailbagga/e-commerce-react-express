@@ -14,12 +14,18 @@ const ProductSearchCard: FC<{ product: ProductRating }> = ({ product }) => {
       ></img>
       <div className="my-5 px-6">
         <Link to={`/products/${product.slug}`}>
-          <h1 className="overflow-hidden text-4xl font-bold line-clamp-2 hover:underline ">
+          <h1
+            title={product.title}
+            className="h-[calc(3rem)] overflow-hidden text-4xl font-bold line-clamp-1 hover:underline"
+          >
             {product.title}
           </h1>
         </Link>
 
-        <p className="pt-2 text-lg font-normal leading-6 text-gray-700 line-clamp-3">
+        <p
+          title={product.description}
+          className="pt-2 text-lg font-normal leading-6 text-gray-700 line-clamp-3"
+        >
           {product.description}
         </p>
         <div className="mt-2 flex items-center space-x-2">
